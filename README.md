@@ -1,10 +1,10 @@
-# Ramanujan Challenge 2026, Problem 3.1
+# The $7_2$ regulator integral is $4\pi^2/85$
 
 ## Reproducible proposed proof of the $7_2$ regulator identity
 
 Status: **submitted; organizer evaluation pending**.
 
-Robert Sneiderman submitted this proposed computer-assisted proof on
+Rob Sneiderman submitted this proposed computer-assisted proof on
 2026-07-12 at 02:38:40 UTC. The submission is recorded by the organizers under
 SHA-256 receipt `87985f32...9f06660`.
 
@@ -103,7 +103,7 @@ pending.
 
 ## Tooling disclosure
 
-The project was developed by Robert Sneiderman with extensive assistance from
+The project was developed by Rob Sneiderman with extensive assistance from
 OpenAI Codex and other frontier language models for symbolic exploration,
 implementation, adversarial review, and exposition. Model output is not treated
 as proof; the mathematical claim rests on the manuscript, cited theorems, and
