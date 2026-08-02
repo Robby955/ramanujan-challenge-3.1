@@ -1,0 +1,893 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Bhat}{\widehat{\mathcal B}}
+\newcommand{\CS}{\operatorname{CS}}
+\newcommand{\Vol}{\operatorname{Vol}}
+\newcommand{\SL}{\mathrm{SL}}
+\newcommand{\PSL}{\mathrm{PSL}}
+\newcommand{\Kind}{K_3^{\mathrm{ind}}}
+
+\title{Ramanujan Challenge 2026, Problem 3.1:\\
+the $7_2$ regulator integral is $4\pi^2/85$\\
+\large A proposed computer-assisted proof and independent audit}
+\author{Robert Sneiderman\\ \texttt{robbysneiderman@gmail.com}}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Problem~3.1 of the Ramanujan Challenge asks for the exact value of a
+Godbillon--Vey type knot invariant: an integral of the Chern--Simons
+variation form along a distinguished real arc of the $\SL(2,\C)$ character
+variety of the prime knot $7_2$.  We present a proposed computer-assisted proof
+that
+\[
+ \int_{\alpha}^{\beta}
+ \left(\log x\,\frac{dy}{y}-\log y\,\frac{dx}{x}\right)
+ =\frac{4\pi^2}{85}.
+\]
+The strategy is to realize the whole arc, not just its endpoints, as an exact
+algebraic family of $\SL(2,\C)$ representations, and then to recognize the
+integral as a difference of two \emph{regulator} values --- Cheeger--Chern--Simons
+invariants of the two closed manifolds obtained by Dehn filling at the ends of
+the arc.  Concretely: we build an exact continuous real Riley and
+enhanced-Ptolemy lift of the full challenge branch; its left endpoint factors
+through the $(-1,2)$ Dehn filling of the $7_2$ exterior and its right endpoint
+through the $(-1,1)$ filling.  Four exact algebraic tetrahedron shapes at each
+endpoint give Neumann's extended Rogers sums $S_\alpha,S_\beta$.  A reciprocal
+Galois symmetry of the endpoint number fields, matched to an orientation-preserving
+symmetry of the four-tetrahedron triangulation, forces twice each extended Bloch
+class into a \emph{totally real} number field; by Borel's rank theorem the
+relevant $K$-group is then finite, so each regulator value lies on an explicit
+finite lattice.  A $1000$-bit Arb interval evaluation on independently
+reconstructed algebraic shapes, with every logarithmic edge
+and Dehn-filling equation checked, is much narrower than one lattice spacing and
+therefore selects the exact values
+\[
+ S_\alpha=-\frac{26\pi^2}{15},\qquad
+ S_\beta=-\frac{86\pi^2}{51}
+ \quad\pmod{\pi^2/2}.
+\]
+Zickert's Dehn-invariant formula and the differential of the extended Rogers
+dilogarithm identify the difference $S_\beta-S_\alpha$ with the required
+integral modulo $\pi^2/2$, and a coarse positive bound $0<I<\pi^2/2$ removes the
+ambiguity in the lift.  Direct quadrature and a separate signed-coordinate
+evaluation reproduce the result to about $60$ and $180$ decimal places,
+respectively, but neither numerical agreement is used as proof.
+\end{abstract}
+
+\section*{Nature of this proof}
+
+This is a proposed \emph{computer-assisted} proof, and we want to be explicit about what
+that means here.  The closing identity $\int_\alpha^\beta\eta=4\pi^2/85$ (here
+$\eta=\log M\,d\log L-\log L\,d\log M$ is the Chern--Simons variation form
+defined in eq.~\eqref{eq:eta} below) is
+verified numerically to about $180$ decimal places; the logical proof does not
+rest on that numerical agreement but uses it only as a cross-check.  The proof
+proper reduces the integral to a congruence on a finite, explicitly bounded
+lattice and then pins down the single lattice point by a certified
+interval computation.  We have since independently re-derived the load-bearing pieces of this argument
+outside the original certificate's environment.  The whole-arc lift, the single
+rational formula $u(M,L)$ of Section~\ref{sec:endpoints} that realizes the entire
+branch as one Riley family, was re-derived from scratch in plain \texttt{sympy};
+the relator identity of Section~\ref{sec:endpoints}, the enhanced-Ptolemy solution
+of Section~\ref{sec:ptolemy}, and the Dehn wedge $\nu=2\,M\wedge L$ of
+Section~\ref{sec:variation} were each reproduced, symbolically or to high
+precision, from the printed equations alone; and the challenge integral itself was
+confirmed to sixty digits by a direct quadrature that touches none of this
+machinery.  The two Chern--Simons regulator values $S_\alpha,S_\beta$ were then
+reproduced by an independent dilogarithm evaluator to about $150$ digits, fed only
+the flattenings and gluing matrix read from SnapPy's public triangulation
+interface, so no step rests on the certificate's own Chern--Simons routine.  Those two
+topological inputs have since been reconstructed by hand from the knot's
+four-tetrahedron triangulation, its explicit face pairings, using no private
+extended-Ptolemy solver: the shapes, flattenings, and gluing matrix are recovered
+from the gluing equations directly and reproduce the regulator values to over
+$160$ digits.  A separate $1000$-bit Arb computation encloses the normalized
+regulator difference in a ball of diameter about $5\times10^{-300}$ and selects
+$4/85$ as the unique point of the proved regulator lattice.  The only residual
+appeal to SnapPy is to read public census combinatorics, the face pairings and
+the peripheral gluing rows, which the challenge permits.
+
+Khoi's 2008 paper supplies the general Godbillon--Vey/$A$-polynomial strategy
+and evaluates related paths for the figure-eight and $5_2$ knots, but it does
+not contain this $7_2$ evaluation.  The formula was presented as an open
+conjecture in the 2026 challenge.  This manuscript was submitted to the
+organizers on July 12, 2026; organizer review remains pending.  We therefore
+make no claim of acceptance, priority, or being a ``first proof.''
+
+\section{Notation and setup}\label{sec:notation}
+
+This section fixes every symbol used later and gives, for each, a word about
+why it appears.  A reader outside low-dimensional topology should be able to
+read the rest of the paper after this section.  Two pieces of standard
+machinery --- the extended Bloch group and the extended Rogers dilogarithm ---
+are recalled where they are first needed, in Sections~\ref{sec:torsion}
+and~\ref{sec:variation}.
+
+\paragraph{The curve and the two eigenvalues.}
+The knot $7_2$ has a well-defined $\SL(2,\C)$ \emph{character variety}
+$X=\operatorname{Hom}(\pi_1(S^3\setminus 7_2),\SL(2,\C))/\!/\SL(2,\C)$, the space of
+representations of the knot group up to conjugacy, whose coordinate ring is
+generated by trace functions.  Restricting a representation to the boundary
+torus and recording the meridian and longitude \emph{eigenvalues} $(M,L)$ (not
+their traces) sends the one-dimensional part of $X$ to a plane curve in the
+$(M,L)$-plane; the defining polynomial of the Zariski closure of that curve is
+the knot's \emph{$A$-polynomial} $A_{7_2}(M,L)$.  The problem statement gives this polynomial explicitly as a
+degree-$5$ polynomial in $L$ with coefficients in $\Z[M]$:
+\begin{align}
+ A_{7_2}(M,L)={}& L^5
+ + L^4\bigl(M^{14}-M^{12}+3M^4+4M^2-2\bigr)\notag\\
+ &{}+ L^3\bigl(-2M^{18}+5M^{16}+M^{14}-4M^{12}+6M^8+5M^6+2M^4-4M^2+1\bigr)\notag\\
+ &{}+ L^2\bigl(M^{22}-4M^{20}+2M^{18}+5M^{16}+6M^{14}-4M^{10}+M^8+5M^6-2M^4\bigr)\notag\\
+ &{}+ L\bigl(-2M^{22}+4M^{20}+3M^{18}-M^{10}+M^8\bigr)
+ + M^{22}.\label{eq:Apoly}
+\end{align}
+Here $M$ and $L$ are the two coordinates on the curve, and they have a concrete
+meaning for a representation $\rho\colon\pi_1(S^3\setminus 7_2)\to\SL(2,\C)$.
+The boundary of the knot exterior is a torus with two distinguished loops, the
+\emph{meridian} and the \emph{longitude}.  Their holonomies (the image matrices $\rho(\text{meridian})$
+and $\rho(\text{longitude})$ under $\rho$) can be simultaneously
+upper-triangularized.  This is not automatic for an arbitrary pair of matrices,
+but here the meridian and longitude are the two generators of the fundamental
+group $\Z^2$ of the boundary torus, so they commute in $\pi_1$; their holonomies
+therefore commute, and a commuting pair of matrices over $\C$ shares an
+eigenvector and can be conjugated into upper-triangular form simultaneously.
+(The two Riley meridian generators $a,b$ of Section~\ref{sec:endpoints}, by
+contrast, do \emph{not} share an eigenvector: that failure is exactly the
+irreducibility of $\rho$.)  In this triangular form,
+\begin{itemize}[nosep]
+ \item $M$ is the \emph{meridian-eigenvalue coordinate}: the function assigning
+ to each representation $\rho$ in the family an eigenvalue $M(\rho)$ of the
+ meridian holonomy.  At a single fixed $\rho$ this is a definite number, but as
+ $\rho$ ranges over the one-dimensional character variety $M$ varies, and it is
+ this variation that the integrand records.  It plays the role of the
+ $x$-coordinate, $M=x$.
+ \item $L$ is the \emph{longitude eigenvalue}: the corresponding eigenvalue of
+ the longitude holonomy, in the challenge (= SnapPy standard-longitude)
+ normalization.  It is the $y$-coordinate, $L=y$.
+\end{itemize}
+The vanishing $A_{7_2}(M,L)=0$ is the condition that a pair $(M,L)$ of
+eigenvalues actually comes from a representation.  This is the defining property
+of the $A$-polynomial~\cite{CCGLS}: $A_{7_2}$ is (the nonabelian factor of) the
+defining polynomial of the Zariski closure of the eigenvalue pairs $(M,L)$
+realized by the peripheral holonomy of an $\SL(2,\C)$ representation.  We do not
+use this abstractly, and in particular do not rely on a point of
+$\{A_{7_2}=0\}$ automatically lifting to a representation: the direction we
+actually need, that $A_{7_2}(M,L)=0$ forces a genuine representation on the
+challenge branch, is established constructively in
+Section~\ref{sec:endpoints}, where the Riley relator
+identity~\eqref{eq:generic-relator} exhibits an explicit irreducible
+representation at every point of the branch.
+
+\paragraph{The Chern--Simons variation form $\eta$.}
+The integrand of the challenge is the $1$-form
+\begin{equation}\label{eq:eta}
+ \eta=\log M\,d\log L-\log L\,d\log M
+ =\log x\,\frac{dy}{y}-\log y\,\frac{dx}{x}.
+\end{equation}
+This is the real $A$-polynomial Chern--Simons variation form studied by
+Khoi~\cite{Khoi}; the geometric content of the whole paper is that its integral
+along the arc below is a difference of Chern--Simons invariants.  We write $x,y$
+and $M,L$ interchangeably as dictated by context: $x,y$ for the curve/integrand,
+$M,L$ for the representation-theoretic eigenvalues.
+
+\paragraph{The challenge branch and its endpoints.}
+Among the real points of the curve there is one distinguished arc.
+
+\begin{definition}[challenge branch]\label{def:branch}
+The \emph{challenge branch} is the real branch $L=y(M)$ of $A_{7_2}(M,L)=0$ for
+$\alpha\le M\le\beta$ on which $y$ is positive and decreasing with slope
+$y'(x)\le-2$.  For each $x$ in $[\alpha,\beta]$ the quintic in $L$ has five real
+roots; the challenge branch is the second-largest of them.  The endpoints are
+\[
+ \alpha\approx 0.349269,\qquad \beta\approx 0.406813,
+\]
+where $\alpha$ is the real root of $A_{7_2}(\alpha,\sqrt\alpha)=0$ closest to
+$0.349269$ and $\beta$ is the real root of $A_{7_2}(\beta,\beta)=0$ closest to
+$0.406813$.  The branch runs from $(M,L)=(\alpha,\sqrt\alpha)$ to $(\beta,\beta)$.
+\end{definition}
+
+\noindent To high precision (50 digits),
+\[
+ \alpha = 0.34926850479999612520833503127884956848473645319259,
+\]
+\[
+ \beta  = 0.40681308133678976238401142887341660342177298944918,
+\]
+\[
+ \tfrac{4\pi^2}{85} = 0.46445197181596981735691722352358358283829173681133.
+\]
+
+\paragraph{Endpoint fields, and the roots $t$ and $r$.}
+The endpoints are algebraic, and we will need the number fields they generate.
+Call these the \emph{endpoint fields}.  They are the number fields generated by
+a real root of the two minimal polynomials
+\begin{align}
+ f_\alpha(t)={}&t^{12}-3t^{11}+4t^{10}-5t^9+6t^8-7t^7+7t^6
+ -7t^5+6t^4-5t^3+4t^2-3t+1,\label{eq:fa}\\
+ f_\beta(r)={}&r^{16}-7r^{15}+22r^{14}-48r^{13}+87r^{12}-133r^{11}
+ +178r^{10}-211r^9+223r^8\notag\\
+ &{}-211r^7+178r^6-133r^5+87r^4-48r^3+22r^2-7r+1.\label{eq:fb}
+\end{align}
+The designated real roots are, plainly,
+\begin{equation}\label{eq:tr}
+ t=\sqrt\alpha=0.59098942867025644049\ldots,
+ \qquad
+ r=\beta=0.40681308133678976238\ldots.
+\end{equation}
+That is: $t$ is exactly the square root of the left endpoint's $M$-value, and
+$r$ is exactly the right endpoint's $M$-value.  The reason $t=\sqrt\alpha$ (and
+not $\alpha$ itself) is the asymmetric normalization in
+Definition~\ref{def:branch}: the left endpoint is defined by $L=M^{1/2}$, so its
+longitude eigenvalue is $\sqrt\alpha=t$ and its meridian eigenvalue is
+$\alpha=t^2$.  Exact substitution gives the endpoint eigenvalue pairs
+\begin{equation}\label{eq:endpts}
+ (M_\alpha,L_\alpha)=(t^2,t),\qquad
+ (M_\beta,L_\beta)=(r,r),\qquad
+ A_{7_2}(M_j,L_j)=0,
+\end{equation}
+where throughout, the subscript $j\in\{\alpha,\beta\}$ ranges over the two
+endpoints and $(M_j,L_j)$ denotes the corresponding meridian/longitude
+eigenvalue pair.  We write $f_\alpha$, $f_\beta$ for the polynomials
+\eqref{eq:fa}--\eqref{eq:fb} and $E_\alpha=\Q(t)$, $E_\beta=\Q(r)$ for the
+endpoint fields they generate.
+
+\paragraph{Riley representations.}
+The knot $7_2$ is the two-bridge knot $b(11,5)$ (Schubert normal form).  For a
+two-bridge knot, every irreducible $\SL(2,\C)$ representation of the knot group
+is conjugate to a two-parameter \emph{Riley representation}: fix one meridian in
+upper-triangular form and normalize the conjugate meridian, obtaining generators
+\begin{equation}\label{eq:riley}
+ a=\begin{pmatrix}s&1\\0&s^{-1}\end{pmatrix},\qquad
+ b=\begin{pmatrix}s&0\\-u&s^{-1}\end{pmatrix},
+\end{equation}
+where $s=M$ is the meridian eigenvalue and $u$ is the \emph{Riley parameter},
+the single off-diagonal unknown chosen so that $(a,b)$ satisfies the knot-group
+relation.  Fixing the meridian eigenvalue $s=M$, that relation becomes the Riley
+polynomial $\phi(M,u)=0$, which has finitely many roots $u$; each root gives a
+representation with its own longitude eigenvalue $L$, so along the $A$-polynomial
+curve $A_{7_2}(M,L)=0$ exactly one value of $u$ is selected at each point
+$(M,L)$.  Thus $u$ is a single-valued rational function $u=u(M,L)$ of the
+peripheral eigenvalue pair, given explicitly in \eqref{eq:generic-u} below.
+(Warning: the letter $b$ is reused in Section~\ref{sec:ptolemy} for
+an unrelated Ptolemy variable.)  The relation and the longitude are built from
+the relator word
+\begin{equation}\label{eq:word}
+ w=aba^{-1}b^{-1}aba^{-1}b^{-1}ab
+ \quad(\text{10 letters}),
+ \qquad \lambda=w^*wa^{-4},
+\end{equation}
+where $w^*$ is $w$ read backwards.  The knot-group relation is $wa=bw$, and
+$\lambda$ is the canonical longitude of this two-bridge presentation.  The
+challenge longitude is the \emph{inverse} of $\lambda$, so if $\lambda_{11}$
+denotes the $(1,1)$ entry (an eigenvalue) of the longitude matrix, then the
+challenge longitude eigenvalue is
+\begin{equation}\label{eq:Llambda}
+ L=\lambda_{11}^{-1},\qquad\text{equivalently } L\lambda_{11}=1.
+\end{equation}
+The identity $L\lambda_{11}=1$ is the ``basis bridge'' between the two-bridge
+presentation and the SnapPy standard basis, and we use it again in
+Section~\ref{sec:variation}.
+
+\paragraph{Symbols introduced later.}
+For orientation, the remaining notation is local to its section and defined
+there: the enhanced Ptolemy coordinates ($c_{1100,0}$, $m=M^{-1}$, and the
+variables $b,c,e$) and cross-ratios $z_{j,0},\dots,z_{j,3}$ in
+Section~\ref{sec:ptolemy}; the shape parameters $z_0,\dots,z_3$, the reciprocal
+involutions $\tau$, the fixed-field generators $X=t+t^{-1}$ resp.\ $r+r^{-1}$,
+the fixed fields $F_j$, the extended Bloch classes $x_j$, the triangulation
+automorphism $\phi$, and the torsion order $w(F)$ in Section~\ref{sec:torsion};
+the logarithmic coordinates $w_0,w_1,w_2$ and the regulator sums $S_\alpha,S_\beta$
+in Section~\ref{sec:interval}; and the extended Rogers function $R(z)$, the Dehn
+invariant $\nu$, and the log-coordinates $X=-\log x$, $Y=-\log y$ in
+Section~\ref{sec:variation}.  A handful of letters are deliberately reused
+(the matrix $I$ vs.\ the integral $I$; the Riley $b$ vs.\ the Ptolemy $b$; the
+polynomial $R(s,u)$ vs.\ the Rogers function $R(z)$; $X$ as a field generator vs.\
+$X=-\log x$; the local exponent $\nu_p$ vs.\ the Dehn invariant $\nu$); each
+reuse is flagged at its second appearance.
+
+\section{The curve and its two representations}\label{sec:endpoints}
+
+The goal of this section is to promote the two \emph{endpoints} of the challenge
+branch to genuine $\SL(2,\C)$ representations, and in fact to lift the
+\emph{entire} arc as one algebraic family.  Recognizing the endpoints as
+representations of closed Dehn fillings is what later lets us treat the integral
+as a difference of Chern--Simons invariants.  Everything here is done by exact
+rational-function arithmetic, independently of any triangulation.
+
+\paragraph{One rational formula for the whole arc.}
+The key point --- and the step flagged in the honesty note --- is that a single
+rational function of $(M,L)$ gives the Riley parameter along the whole branch.
+Set $s=M$ and
+\begin{equation}\label{eq:generic-u}
+ u(M,L)=\frac{(M^2-1)(L-1)}{M^2+L}.
+\end{equation}
+With this choice, direct rational-function arithmetic in the Riley matrices
+\eqref{eq:riley} evaluates the relator $wa-bw$ explicitly.  Its $(1,2)$ entry is
+\begin{equation}\label{eq:generic-relator}
+ (wa-bw)_{12}=\frac{A_{7_2}(M,L)}{M^6(M^2+L)^5},
+ \qquad
+ A_{7_2}(M,L)\mid\operatorname{num}(L\lambda_{11}-1)
+ \quad\text{in }\Q[M,L],
+\end{equation}
+and the other three relator entries either vanish identically or are multiples
+of this one.  In particular, on the curve $A_{7_2}(M,L)=0$ the relation $wa=bw$
+holds, so \eqref{eq:generic-u} really does produce a representation for every
+point of the branch.  The same arithmetic yields the commutator trace
+\begin{equation}\label{eq:generic-irreducible}
+ \operatorname{tr}([a,b])-2=
+ \frac{(L-1)(M^2-1)^2(L-M^4)}{M^2(M^2+L)^2},
+\end{equation}
+where $[a,b]=aba^{-1}b^{-1}$.  Since $\operatorname{tr}([a,b])-2\ne0$ exactly
+when the representation is irreducible, \eqref{eq:generic-irreducible} is our
+irreducibility detector.
+
+\begin{proposition}\label{prop:arc-lift}
+On the challenge branch one has $1/4<M<1/2$, $1/4<L<1$, and $L>M^4$.  Hence every
+denominator in \eqref{eq:generic-u}--\eqref{eq:generic-irreducible} is nonzero,
+and \eqref{eq:generic-irreducible} never vanishes.  Therefore \eqref{eq:generic-u}
+defines a continuous real irreducible representation path over the whole
+challenge arc, with positive peripheral eigenvalues different from $1$, i.e.\
+purely hyperbolic peripheral holonomy.
+\end{proposition}
+
+\begin{proof}
+The stated inequalities are exact facts about the branch (they follow from the
+root isolation recorded in Section~\ref{sec:variation}).  Given them, the
+denominators $M^2+L$, $M^2$, and $M^6(M^2+L)^5$ are all nonzero, so
+\eqref{eq:generic-u} and the relator identity \eqref{eq:generic-relator} are
+valid; and $(L-1)(M^2-1)^2(L-M^4)\ne0$ because $L\ne1$, $M\ne\pm1$, and
+$L>M^4$, so \eqref{eq:generic-irreducible} is nonzero and the representation is
+irreducible.  The Riley normalization \eqref{eq:riley} is itself elementary:
+triangularize one meridian, then irreducibility lets one normalize the conjugate
+meridian as shown.  A reducible knot representation would have longitude
+eigenvalue $1$, because its diagonal character factors through the
+abelianization, on which the longitude is trivial; here $L\ne1$, consistent with
+irreducibility.
+\end{proof}
+
+\paragraph{Isolating the two endpoint characters and their fillings.}
+Let $R(s,u)$ be the numerator of the $(1,2)$ entry of $wa-bw$.  (This $R(s,u)$
+is a polynomial; it is unrelated to Neumann's Rogers function $R(z)$ of
+Section~\ref{sec:variation}.)  The diagonal entries of $wa-bw$ vanish
+identically and its $(2,1)$ entry has numerator $uR(s,u)$.  Running the exact
+Euclidean algorithm in the variable $u$ over each endpoint field isolates a
+single value of $u$, via linear greatest common divisors:
+\begin{align}
+ \gcd_u\bigl(R(t^2,u),t\lambda_{11}(t^2,u)-1\bigr)
+ ={}&u+2t^{11}-5t^{10}+5t^9-7t^8+9t^7-9t^6\notag\\
+ &{}+9t^5-10t^4+7t^3-6t^2+5t-2,\label{eq:ugcd-a}\\
+ \gcd_u\bigl(R(r,u),r\lambda_{11}(r,u)-1\bigr)
+ ={}&u+r^{15}-7r^{14}+22r^{13}-48r^{12}+87r^{11}\notag\\
+ &{}-133r^{10}+178r^9-211r^8+223r^7-211r^6
+ +178r^5\notag\\
+ &{}-133r^4+87r^3-48r^2+21r-5.\label{eq:ugcd-b}
+\end{align}
+Substituting the resulting root for $u$ makes \emph{every} entry of $wa-bw$
+zero, and moreover gives the exact matrix identities
+\begin{equation}\label{eq:fillings}
+ a^{-1}\lambda^{-2}=I\quad(\alpha),
+ \qquad
+ a^{-1}\lambda^{-1}=I\quad(\beta),
+\end{equation}
+where $I$ is the $2\times2$ identity matrix.  (This $I$ is unrelated to the
+integral $I$ of Section~\ref{sec:variation}.)  These are precisely the relations
+of the closed manifolds obtained by Dehn surgery.  (Dehn filling glues a solid
+torus to the torus boundary of the exterior so that the peripheral curve
+$p\cdot(\text{meridian})+q\cdot(\text{longitude})$ becomes contractible; the
+resulting closed manifold's group is the knot group with that curve killed,
+which is exactly a relation of the form \eqref{eq:fillings}.)  The left
+representation
+factors through the SnapPy filling $(-1,2)$, and the right through $(-1,1)$.  One
+checks directly that the two gcd roots \eqref{eq:ugcd-a}--\eqref{eq:ugcd-b} are
+the specializations of the single generic formula \eqref{eq:generic-u} at
+$(t^2,t)$ and $(r,r)$; so the endpoint characters are exactly the ends of the
+one-parameter family of Proposition~\ref{prop:arc-lift}.  Finally,
+\eqref{eq:Llambda} records the basis bridge $L\lambda_{11}=1$: the variable $L$
+is the challenge (and SnapPy standard-longitude) eigenvalue, while $\lambda$ is
+the canonical longitude of the two-bridge presentation.
+
+\begin{remark}
+The whole-arc lift \eqref{eq:generic-u}, together with the identities
+\eqref{eq:generic-relator}--\eqref{eq:generic-irreducible}, was independently
+re-derived from scratch in a separate computer algebra system; see the note at
+the head of the paper.
+\end{remark}
+
+\section{Exact enhanced Ptolemy points}\label{sec:ptolemy}
+
+To compute Chern--Simons invariants we need the representations expressed on an
+actual ideal triangulation, as tetrahedron shapes.  We use SnapPy's
+four-tetrahedron triangulation of the $7_2$ exterior together with Zickert's
+\emph{enhanced Ptolemy variety}~\cite{ZickertPtolemy}: an affine variety whose
+points parametrize generically decorated $\SL(2,\C)$
+representations on a \emph{fixed} triangulation with prescribed meridian and
+longitude eigenvalues.  Here a \emph{decoration} (also called a
+boundary-decoration) is a choice of horosphere --- equivalently a coset fixing a
+lift of the peripheral fixed point --- at each cusp; this is the extra boundary
+data the Ptolemy coordinates record.  Its coordinates are $24$ signed numbers, one per
+oriented edge-with-sign; from them one reads off the tetrahedron shapes, and
+from the shapes the Cheeger--Chern--Simons regulator.  We recover the same
+characters as in Section~\ref{sec:endpoints} on this triangulation.
+
+\paragraph{The gauge-fixed system.}
+Normalize one enhanced Ptolemy coordinate to $c_{1100,0}=1$ (a gauge choice),
+abbreviate $m=M^{-1}$, and eliminate the coordinates identified by the face
+pairings.  The enhanced ideal then reduces to a four-equation system in three
+unknowns $b,c,e$:
+\begin{equation}\label{eq:ptolemy-system}
+ \begin{split}
+  -Mb-mc-be&=0,\\
+  -Lmb^2-m-e&=0,\\
+  Lm^4b+Lmbe-c&=0,\\
+  Mc^2-Me^2+c&=0.
+ \end{split}
+\end{equation}
+Here $b,c,e$ are Ptolemy coordinate unknowns and have \emph{nothing} to do with
+the Riley generator $b$ of \eqref{eq:riley}.  This system lifts the whole real
+arc on one fixed triangulation.  On the curve $A_{7_2}(M,L)=0$ the solution is
+\begin{equation}\label{eq:generic-ptolemy}
+ b^2=\frac{(1-M^2)(L-M^4)}{LM^2(M^2+L)},\qquad
+ e=-\frac{Lb^2+1}{M},\qquad
+ c=b(Lb^2+1-M^2).
+\end{equation}
+The certificate uses an explicit rational choice of $b(M,L)$ and verifies all
+four equations of \eqref{eq:ptolemy-system} as rational-function identities
+modulo $A_{7_2}$.  As the sharpest such check, the difference between its $b^2$
+and the displayed $b^2$ of \eqref{eq:generic-ptolemy} is exactly
+\[
+ \frac{(M^6+L)\,A_{7_2}(M,L)}
+ {L^2(M^2-1)^2M^6(M^2+1)^2(M^2+L)^4},
+\]
+which vanishes on the curve.
+
+\paragraph{Choosing a continuous branch of shapes.}
+The displayed $b^2$ in \eqref{eq:generic-ptolemy} is positive on the challenge
+arc, and both endpoint solutions have $b<0$, so we take the continuous negative
+branch.  Then
+\[
+ Lb^2+1-M^2=
+ \frac{L(1-M^2)(1+M^2)}{M^2(M^2+L)}>0,
+\]
+so by \eqref{eq:generic-ptolemy} the coordinates $b,c,e$ stay negative and
+nonzero along the arc.  Each of the $24$ signed coordinates is a fixed sign
+times a monomial in $M,L$ times one of $1,b,c,e$; hence none vanishes, the four
+tetrahedron shapes avoid $0$ and $1$, and their logarithms can be continued from
+the left endpoint to the right without a branch change.  This continuity is what
+makes the endpoint regulators comparable in Section~\ref{sec:interval}.
+
+\paragraph{Exact endpoint solutions and identification with the Riley characters.}
+Over $E_\alpha=\Q(t)$ at $(M,L)=(t^2,t)$ and over $E_\beta=\Q(r)$ at
+$(M,L)=(r,r)$, the reduced Gr\"obner basis of \eqref{eq:ptolemy-system} is linear
+in $b,c,e$.  The certificate solves it exactly, expands all $24$ signed Ptolemy
+coordinates, and substitutes them back into the unreduced enhanced Ptolemy ideal;
+every residual is the zero element of the relevant number field.  Writing
+$z_{j,0},\dots,z_{j,3}$ for the four primary cross-ratios (tetrahedron shape
+parameters) obtained from those coordinates at endpoint $j$, direct
+multiplication in the number fields gives every edge product and the filled-cusp
+product equal to $1$ exactly, and no shape equals $0$ or $1$.  So the Ptolemy
+point is a nondegenerate decorated representation with the stated peripheral
+eigenvalues, and its three base coordinates match the specializations of the
+rational full-curve coordinates \eqref{eq:generic-ptolemy}.
+
+These endpoint Ptolemy representations are the endpoint Riley representations of
+Section~\ref{sec:endpoints}.  Indeed $L_j\ne1$, whereas a reducible knot-group
+representation has longitude eigenvalue $1$; so the Ptolemy representation is
+irreducible, hence conjugate to the Riley form \eqref{eq:riley}, and the linear
+gcds \eqref{eq:ugcd-a}--\eqref{eq:ugcd-b} leave exactly one character over each
+peripheral point.  This proves equality of the two \emph{characters}, not merely
+of their peripheral eigenvalues.
+
+\begin{remark}
+The original certificate obtained this system through SnapPy's enhanced
+Ptolemy interface.  The public audit no longer treats that interface as an
+oracle: one checker verifies the printed equations, while a second reconstructs
+the edge equations, shapes, and flattenings from the explicit four-tetrahedron
+census triangulation.  The remaining SnapPy inputs are public face-pairing and
+peripheral-curve data.  Both checkers are included in the verification bundle.
+\end{remark}
+
+\section{Reciprocal symmetry and a finite regulator lattice}\label{sec:torsion}
+
+We now recall just enough $K$-theory to say what a ``regulator'' is here, and
+then exploit a symmetry to trap it on a finite lattice.  Concretely, the
+regulator of an endpoint representation is the complex number $S_j$ computed in
+Section~\ref{sec:interval} as a sum of extended Rogers dilogarithm values over
+the four tetrahedron shapes; it is well-defined only modulo the period recorded
+in the table below, and the whole proof consists of pinning down that number.
+With that picture fixed, the $K$-theory that follows is structure, not
+definition.  Neumann's
+\emph{extended Bloch group} $\widehat{\mathcal B}(F)$ of a field $F$ is the
+receptacle for a Cheeger--Chern--Simons class of a representation together with a
+choice of flattening (a lift of tetrahedron shape logarithms); it is naturally
+isomorphic to the indecomposable part $\Kind(F)$ of algebraic $K$-theory, and it
+carries the extended Rogers regulator (defined in Section~\ref{sec:variation}).
+There is an $\SL$ version $\widehat{\mathcal B}_{\SL}(F)$ and a $\PSL$ version,
+differing by the period conventions recorded below.  The value $\int\eta$ we
+want will be a difference of regulator values, so the whole difficulty is to
+know that difference lies in a small, explicitly known group.
+
+\paragraph{Reciprocal involutions and totally real fixed fields.}
+Both endpoint polynomials \eqref{eq:fa}--\eqref{eq:fb} are reciprocal, so
+$t\mapsto t^{-1}$ and $r\mapsto r^{-1}$ are field automorphisms.  Let
+$\tau_\alpha(t)=t^{-1}$ on $E_\alpha$ and $\tau_\beta(r)=r^{-1}$ on $E_\beta$;
+write $\tau$ for either one.  Its fixed field is generated by $X=t+t^{-1}$
+(resp.\ $X=r+r^{-1}$), with defining polynomials
+\begin{align}
+ g_\alpha(X)&=X^6-3X^5-2X^4+10X^3-X^2-7X+1,\label{eq:ga}\\
+ g_\beta(X)&=X^8-7X^7+14X^6+X^5-25X^4+9X^3+12X^2-3X-1.\label{eq:gb}
+\end{align}
+(This field generator $X$ is unrelated to $X=-\log x$ in
+Section~\ref{sec:variation}.)  Exact real-root isolation gives signatures
+$(6,0)$ and $(8,0)$ and discriminants $5^3\cdot3881$ and $17^7$; in particular
+both fixed fields, which we call $F_\alpha$ and $F_\beta$, are \emph{totally
+real}.
+
+\paragraph{Matching the field symmetry to a symmetry of the triangulation.}
+The reciprocal action on the exact tetrahedron shapes is the same at both
+endpoints.  Writing $z_0,z_1,z_2,z_3$ for the four generic shape parameters
+(recall a shape $z$ has partners $1-z^{-1}$, etc.),
+\begin{equation}\label{eq:shape-action}
+ \tau(z_0)=1-z_2^{-1},\qquad
+ \tau(z_1)=z_1,\qquad
+ \tau(z_2)=(1-z_0)^{-1},\qquad
+ \tau(z_3)=z_3.
+\end{equation}
+The four-tetrahedron triangulation has a nonidentity orientation-preserving
+automorphism $\phi$,
+\begin{equation}\label{eq:tet-auto}
+ 0\mapsto(2;(2,1,3,0)),\quad
+ 1\mapsto(1;(3,2,1,0)),\quad
+ 2\mapsto(0;(3,1,0,2)),\quad
+ 3\mapsto(3;(1,0,3,2)),
+\end{equation}
+where the tuple after each semicolon is the vertex permutation.  All four
+permutations are even (so $\phi$ preserves orientation), and the induced cusp map
+is $-I$, so $\phi$ extends over both fillings.  Its shape transformations are
+exactly \eqref{eq:shape-action}.  We write $\phi_*$ for the induced map on
+representations.
+
+\paragraph{Twice each Bloch class descends to the totally real field.}
+The exact Riley lift is an $\SL_2(E_j)$ representation of the closed filling, so
+it defines an extended Bloch class
+\[
+ x_j\in\widehat{\mathcal B}_{\SL}(E_j)\simeq\Kind(E_j),
+\]
+with image $\bar x_j$ in the $\PSL$ extended Bloch group.  The two groups and
+their periods must be kept separate:
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+ group / class & period & reference\\
+\midrule
+ $\SL$ regulator & mod $4\pi^2$ & \cite[Section~2.2.1]{ZickertK3}\\
+ $\PSL$ Cheeger--Chern--Simons & mod $\pi^2$ & \cite[Prop.~2.5, Thm.~2.6]{Neumann}\\
+ certified evaluator & mod $\pi^2/2$ & \cite[Thm.~3.4]{Yoon}\\
+\bottomrule
+\end{tabular}
+\end{center}
+All maps here are homomorphisms, so an order bound for $x_j$ also bounds the
+evaluator's value on $\bar x_j$.  Now the shape identities \eqref{eq:shape-action}
+say that $\tau_j\rho_j$ is $\PSL_2$-conjugate to $\rho_j\circ\phi_*$, where
+$\rho_j$ is the endpoint representation and $\phi$ is the automorphism
+\eqref{eq:tet-auto}.  Nondegenerate shape data determine the decorated $\PSL$
+representation; $\phi$ preserves orientation and its cusp map is $-I$, so it
+extends over each filling and preserves the closed fundamental class.  The two
+resulting $\SL$ lifts can therefore differ only by a $\Z/2$ cocycle, and
+Zickert's two-torsion result for such a change of lift gives
+\cite[Theorem~6.15]{ZickertK3}
+\[
+ 2\tau_j(x_j)=2x_j.
+\]
+Galois descent \cite[Corollaries~7.14--7.15]{ZickertK3} then places $2x_j$ in
+$\Kind(F_j)$, where $F_j$ is the totally real fixed field of $\tau_j$.
+
+\paragraph{Borel finiteness and the explicit lattice.}
+Borel's rank theorem states $\operatorname{rank}\Kind(F)=r_2(F)$, the number of
+complex (conjugate-pair) places of $F$~\cite{Borel}.  Since $F_j$ is totally
+real, $r_2(F_j)=0$, so $\Kind(F_j)$ is \emph{finite}.  Its torsion subgroup is
+cyclic of order
+\begin{equation}\label{eq:wF}
+ w(F)=2\prod_p p^{\nu_p},\qquad
+ \nu_p=\max\{\nu:\zeta_{p^\nu}+\zeta_{p^\nu}^{-1}\in F\}
+\end{equation}
+\cite[Section~1]{ZickertK3}, where $\zeta_{p^\nu}$ is a primitive $p^\nu$-th root
+of unity and $\zeta+\zeta^{-1}$ is the real generator of its cyclotomic field.
+(This local exponent $\nu_p$ is unrelated to the Dehn invariant $\nu$ of
+Section~\ref{sec:variation}.)  We need only degree-based upper bounds: if $F$ is
+totally real of degree $d=[F:\Q]$ and contains $\zeta_{p^\nu}+\zeta_{p^\nu}^{-1}$,
+then $\varphi(p^\nu)/2$ divides $d$ (for $p^\nu>2$), with $\varphi$ Euler's
+totient.  Applying this to $F_\alpha$ (degree $6$): the condition
+$\varphi(p^\nu)\mid12$ is met only by the prime powers $p^\nu=8$
+($\varphi=4$), $9$ ($\varphi=6$), $5$ ($\varphi=4$), $7$ ($\varphi=6$),
+$13$ ($\varphi=12$), giving factors $2^3,3^2,5,7,13$; for $F_\beta$ (degree
+$8$) the condition $\varphi(p^\nu)\mid16$ is met only by $32$ ($\varphi=16$),
+$3$ ($\varphi=2$), $5$ ($\varphi=4$), $17$ ($\varphi=16$), giving
+$2^5,3,5,17$.  With the leading factor $2$ of \eqref{eq:wF} this yields
+\begin{equation}\label{eq:w-bounds}
+ w(F_\alpha)\mid 2\cdot2^3\cdot3^2\cdot5\cdot7\cdot13=65520,
+ \qquad
+ w(F_\beta)\mid 2\cdot2^5\cdot3\cdot5\cdot17=16320.
+\end{equation}
+Thus $x_\alpha$ and $x_\beta$ have orders dividing $131040$ and $32640$.  After
+projection to $\C/(\pi^2/2)\Z$, the regulator difference has order dividing
+\[
+ N=\operatorname{lcm}(131040,32640)=8910720,
+\]
+so, after division by $\pi^2$, it lies on the finite lattice
+\begin{equation}\label{eq:lattice}
+ \frac{1}{2N}\Z\bigg/\frac12\Z
+ =\frac{1}{17821440}\Z\bigg/\frac12\Z.
+\end{equation}
+
+\section{Certified selection of the regulator value}\label{sec:interval}
+
+The regulator difference is now known to sit on the lattice \eqref{eq:lattice},
+whose spacing is about $5.61\times10^{-8}$.  It remains to identify the exact
+lattice point.  We do this by a certified $1000$-bit Arb interval evaluation of the
+extended Rogers sum --- the sum of Neumann's extended Rogers function $R(z)$
+(defined in Section~\ref{sec:variation}) over the four tetrahedra --- at each
+endpoint, narrow enough to pin one point.
+
+\paragraph{Flattenings with no hidden $2\pi i$.}
+For each endpoint, the independently reconstructed algebraic shapes determine
+logarithmic coordinates $w_0,w_1,w_2$ on every tetrahedron (branch-chosen logs
+of the shape parameters).  The audit multiplies these logarithms by the full
+$5\times12$ PGL (projective general linear) gluing matrix, whose rows encode the
+four edge relations plus the
+Dehn-filling relation labelled \texttt{filling\_0\_0}.  All four edge rows and the
+filling row evaluate to zero as complex intervals; the largest row diameter is
+$2.24\times10^{-207}$ at $\alpha$ and $6.28\times10^{-206}$ at $\beta$.  Because
+all peripheral eigenvalues are positive, the filling relations carry no hidden
+$2\pi i$ term:
+\[
+ -\log M_\alpha+2\log L_\alpha=0,
+ \qquad
+ -\log M_\beta+\log L_\beta=0.
+\]
+Thus the closed strong flattenings (flattenings whose log-parameters sum to the
+value Neumann requires for the closed manifold, a strengthening of the plain
+flattening of Section~\ref{sec:torsion}) are the endpoint values of the
+continuous exterior Ptolemy regulator of Section~\ref{sec:ptolemy}.
+
+\paragraph{Evaluating the extended Rogers sum.}
+The extended Rogers sum is evaluated with $1000$-bit real balls, together
+with Neumann's $6$-torsion correction for a triangulation without a vertex
+ordering \cite[Section~13 and Proposition~13.1]{Neumann}.  The lifted flattenings
+satisfy Yoon's edge and Dehn-filling conditions; his Theorem~3.1 and the parity
+argument in the proof of Theorem~3.4 identify the sum with the filled complex
+volume modulo $\pi^2/2$~\cite{Yoon}.  The correction coefficient is exactly $-6$
+at both endpoints, contributing $-6(\pi^2/6)=-\pi^2$, which is $0$ modulo
+$\pi^2/2$ and cancels in the difference.  In the evaluator's $i(\Vol+i\CS)$
+convention, where $\Vol$ and $\CS$ denote the hyperbolic volume and
+Chern--Simons invariant of the filled manifold, the sums are
+\begin{align}
+ \frac{S_\alpha}{\pi^2}
+  &=-1.733333333333333333333333\ldots,
+  \label{eq:Sa}\\
+ \frac{S_\beta}{\pi^2}
+  &=-1.686274509803921568627451\ldots.
+  \label{eq:Sb}
+\end{align}
+
+\paragraph{The lattice selects a unique value.}
+The Arb enclosure of $(S_\beta-S_\alpha)/\pi^2$ contains $4/85$ and has
+diameter less than $5\times10^{-300}$, far below the lattice spacing
+$5.61\times10^{-8}$ of \eqref{eq:lattice}.  Both neighboring lattice points
+$4/85\pm1/(2N)$ are rigorously excluded.  Hence the enclosure contains exactly
+one admissible regulator value, so
+\begin{equation}\label{eq:reg-difference}
+ S_\beta-S_\alpha=\frac{4\pi^2}{85}
+ \quad\pmod{\pi^2/2}.
+\end{equation}
+The same lattice argument selects the individual representatives
+\[
+ S_\alpha=-\frac{26\pi^2}{15},\qquad
+ S_\beta=-\frac{86\pi^2}{51}
+ \quad\pmod{\pi^2/2}
+\]
+(consistent with \eqref{eq:Sa}--\eqref{eq:Sb}, since $-26/15=-1.7333\ldots$ and
+$-86/51=-1.686274\ldots$).
+
+\paragraph{An independent numerical cross-check.}
+The original certificate also runs a separate numerical path that does not feed the
+lattice proof.  It expands the actual signed Ptolemy coordinates, uses SnapPy's
+public cross-ratio and flattening code, and multiplies the logarithmic gluing
+matrix explicitly.  This path uses the $\Vol+i\CS$ convention (rather than
+$i(\Vol+i\CS)$) and returns
+\[
+ \frac{\CS_\alpha}{\pi^2}=\frac1{15},\qquad
+ \frac{\CS_\beta}{\pi^2}=\frac1{51}
+ \quad\pmod{1/6},
+\]
+so $\CS_\alpha-\CS_\beta=4\pi^2/85$ to about $180$ decimal places (with $\Vol$
+and $\CS$ as above, the hyperbolic volume and Chern--Simons invariant).
+
+\section{From the regulator to the challenge integral}\label{sec:variation}
+
+Two things remain: to check that the regulator difference is genuinely the
+integral of $\eta$ (not some other $1$-form), and to remove the modulo $\pi^2/2$
+ambiguity.  The first is a differential identity built on the Dehn invariant and
+the extended Rogers dilogarithm; the second is a coarse but rigorous size bound.
+
+\paragraph{The extended Rogers dilogarithm and the Dehn invariant.}
+Let $S(M,L)$ be the continuous extended Rogers sum on the Ptolemy lift
+\eqref{eq:generic-ptolemy}, with logarithms continued from the left endpoint; its
+endpoint values are the $S_\alpha,S_\beta$ of Section~\ref{sec:interval}.  The
+unordered-triangulation correction is constant, so its differential is zero.
+Neumann's \emph{extended Rogers function} $R(z)$ (on the extended Bloch group,
+unrelated to the polynomial $R(s,u)$ of Section~\ref{sec:endpoints}) has
+differential
+\begin{equation}\label{eq:dR}
+ 2\,dR(z)=\log z\,d\log(1-z)-\log(1-z)\,d\log z.
+\end{equation}
+The remaining ingredient is the Dehn invariant, which measures how the shapes
+vary along the peripheral torus.  For $n=2$, Zickert's Dehn-invariant formula
+gives $-2\,M\wedge L$ in a peripheral basis of intersection number $+1$
+\cite[Theorem~1.10]{ZickertPtolemy}, where $M\wedge L$ is the wedge of the
+meridian and longitude eigenvalues in the target of the Dehn invariant.  Our
+$M,L$ are the challenge and SnapPy standard-basis eigenvalues by the exact
+identity $L\lambda_{11}=1$ from Section~\ref{sec:endpoints}, and the standard
+knot meridian--longitude basis has intersection number $-1$
+\cite[Section~3.1]{ZickertPtolemy}.  In that basis the Dehn invariant is
+therefore
+\begin{equation}\label{eq:dehn}
+ \nu=2\,M\wedge L.
+\end{equation}
+As a direct sign check, the independent script
+\texttt{dehn\_wedge\_reconstruction.py} forms $z_i\wedge(1-z_i)$ from the
+exponent vectors of all $24$ signed-coordinate monomials; every wedge involving
+the Ptolemy variables $b,c,e$ cancels, leaving the single surviving coefficient
+$+2$ on $M\wedge L$.
+
+\begin{remark}
+The sign in \eqref{eq:dehn} is no longer accepted only from the original
+certificate.  The independent reconstruction enumerates the orientation signs,
+cancels every wedge involving the internal Ptolemy variables, and leaves the
+single coefficient $+2$ on $M\wedge L$.
+\end{remark}
+
+\paragraph{The differential is exactly $\eta$.}
+Applying \eqref{eq:dR} to the formal shape sum and adding the Dehn term
+\eqref{eq:dehn} gives
+\begin{equation}\label{eq:dS}
+ dS=\log M\,d\log L-\log L\,d\log M=\eta.
+\end{equation}
+Since the continuous Ptolemy lift connects the exact endpoint flattenings,
+integrating \eqref{eq:dS} and using \eqref{eq:reg-difference} yields the integral
+modulo the period,
+\begin{equation}\label{eq:congruence}
+ I:=\int_\alpha^\beta\eta=\frac{4\pi^2}{85}
+ \quad\pmod{\pi^2/2}.
+\end{equation}
+(This integral $I$ is unrelated to the identity matrix $I$ of
+Section~\ref{sec:endpoints}.)
+
+\paragraph{Removing the period ambiguity.}
+The stated branch fixes the real lift with no numerical quadrature.  Put
+$X=-\log x$ and $Y=-\log y$, both positive since $x,y\in(0,1)$.  (This $X$ is
+unrelated to the fixed-field generator $X$ of Section~\ref{sec:torsion}.)  Since
+$dx>0$ and $dy<0$ along the branch,
+\[
+ \eta=X\,dY-Y\,dX>0,
+\]
+so $I>0$.  Exact root isolation gives
+\[
+ \frac14<\alpha<\frac38<\beta<\frac12,
+ \qquad
+ \frac14<y(\beta)<\frac12<y(\alpha)<1,
+\]
+with endpoint values $y(\alpha)=\sqrt\alpha\approx0.5909894287$ and
+$y(\beta)=\beta\approx0.4068130813$.  It follows that
+\begin{align*}
+ I
+ &<\log4\bigl((Y_\beta-Y_\alpha)+(X_\alpha-X_\beta)\bigr)\\
+ &=\log4\,\log\!\left(
+ \frac{y(\alpha)}{y(\beta)}\frac{\beta}{\alpha}
+ \right)
+ <\log4\,\log8<\frac92<\frac{\pi^2}{2}.
+\end{align*}
+Both $I$ and $4\pi^2/85$ lie strictly between $0$ and $\pi^2/2$, so the
+congruence \eqref{eq:congruence} has exactly one admissible real lift.  This
+proves the challenge identity:
+\[
+ \boxed{\displaystyle
+ \int_{\alpha}^{\beta}
+ \left(\log x\,\frac{dy}{y}-\log y\,\frac{dx}{x}\right)
+ =\frac{4\pi^2}{85}.}
+\]
+
+\section{Reproducibility}\label{sec:repro}
+
+The public release uses the independent-verification route rather than requiring
+SnapPy's private \texttt{dev.extended\_ptolemy} interface.  It requires Python
+with \texttt{sympy} and \texttt{mpmath}, plus SageMath~10.9 with SnapPy~3.3.2
+installed in Sage's Python.  From the repository root, the complete gate is
+\begin{verbatim}
+verification/run_all.sh
+\end{verbatim}
+The runner first checks that Sage and SnapPy share one interpreter, then executes
+the exact Riley identities, independent endpoint and uniqueness checks,
+Dehn-wedge reconstruction, direct quadrature, by-hand triangulation and
+flattening reconstruction, and the final Arb lattice-selection certificate.
+The load-bearing final command is
+\begin{verbatim}
+$SAGE -python verification/exactness_closure.py
+\end{verbatim}
+and prints its explicit closed verdict only after the field, torsion-bound,
+interval, and neighboring-lattice-point assertions pass.  The exact status of
+every layer is recorded in the verification ledger shipped with the source.
+Borel's finiteness theorem and
+the Zickert--Neumann regulator normalizations are cited inputs, not reproved.
+
+\section*{Acknowledgments and tooling disclosure}
+
+The Ramanujan Machine group posed the problem.  The project was developed by
+Robert Sneiderman with extensive assistance from OpenAI Codex and other
+frontier language models for symbolic exploration, implementation, adversarial
+review, and exposition.  Model output is not treated as mathematical evidence:
+the claim rests on the displayed argument, cited published theorems, and the
+reproducible exact and certified computations described above.
+
+\begin{thebibliography}{9}
+
+\bibitem{CCGLS}
+D.~Cooper, M.~Culler, H.~Gillet, D.~D.~Long, P.~B.~Shalen,
+\emph{Plane curves associated to character varieties of $3$-manifolds},
+Invent. Math. \textbf{118} (1994), no.~1, 47--84.
+
+\bibitem{Borel}
+A.~Borel,
+\emph{Cohomologie de $\mathrm{SL}_n$ et valeurs de fonctions z\^eta aux points entiers},
+Ann. Scuola Norm. Sup. Pisa Cl. Sci. (4) \textbf{4} (1977), no.~4, 613--636.
+
+\bibitem{Khoi}
+V.~T.~Khoi,
+\emph{On the integral of $\log x\,dy/y-\log y\,dx/x$ over the A-polynomial curves},
+Acta Math. Vietnam. \textbf{33} (2008), no.~3, 519--528;
+arXiv:0811.2725.
+
+\bibitem{Neumann}
+W.~D.~Neumann,
+\emph{Extended Bloch group and the Cheeger--Chern--Simons class},
+Geom. Topol. \textbf{8} (2004), 413--474;
+arXiv:math/0307092.
+
+\bibitem{Yoon}
+S.~Yoon,
+\emph{The volume and Chern--Simons invariant of a Dehn-filled manifold},
+Topology Appl. \textbf{256} (2019), 105--121;
+arXiv:1801.08288.
+
+\bibitem{ZickertPtolemy}
+C.~K.~Zickert,
+\emph{Ptolemy coordinates, Dehn invariant and the A-polynomial},
+Math. Z. \textbf{283} (2016), 515--537;
+arXiv:1405.0025.
+
+\bibitem{ZickertK3}
+C.~K.~Zickert,
+\emph{The extended Bloch group and algebraic $K$-theory},
+J. Reine Angew. Math. \textbf{704} (2015), 21--54;
+arXiv:0910.4005.
+
+\end{thebibliography}
+
+\end{document}
