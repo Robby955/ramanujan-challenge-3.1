@@ -1,13 +1,13 @@
-# The $7_2$ regulator integral is $4\pi^2/85$
+# The 7₂ regulator integral is 4π²/85
 
-## A reproducible computer-assisted proof of the $7_2$ regulator identity
+## A reproducible computer-assisted proof of the 7₂ regulator identity
 
 Status: **submitted; organizer evaluation pending**.
 
 The Ramanujan Challenge closed on August 1, 2026. One of the open problems it
 posed, Problem 3.1, asked for the exact value of a regulator integral associated
-with the $7_2$ knot. This repository contains a computer-assisted proof that the
-value is $4\pi^2/85$.
+with the 7₂ knot. This repository contains a computer-assisted proof that the
+value is 4π²/85.
 
 Rob Sneiderman submitted the proof on 2026-07-12 at 02:38:40 UTC. The
 submission is recorded by the organizers under SHA-256 receipt
@@ -15,18 +15,18 @@ submission is recorded by the organizers under SHA-256 receipt
 
 ## Result
 
-For the distinguished real branch of the `7_2` knot A-polynomial specified in
+For the distinguished real branch of the 7₂ knot A-polynomial specified in
 [Problem 3.1](https://www.ramanujanmachine.com/ramanujan-challenge/), the
 manuscript proves
 
 ```text
-Integral_alpha^beta (log(x) dy/y - log(y) dx/x) = 4*pi^2/85.
+∫_α^β (log(x) dy/y - log(y) dx/x) = 4π²/85.
 ```
 
 The challenge introduced this formula as an open conjecture. Khoi's 2008 paper
 develops the general Godbillon-Vey/A-polynomial strategy and evaluates related
-paths for the figure-eight and `5_2` knots, but not this `7_2` identity. The
-claimed contribution here is the explicit `7_2` proof and reproducible
+paths for the figure-eight and 5₂ knots, but not this 7₂ identity. The
+claimed contribution here is the explicit 7₂ proof and reproducible
 certificate, not a new general regulator method.
 
 ## Proof spine
@@ -45,7 +45,7 @@ certificate, not a new general regulator method.
    rigorously excludes both neighboring lattice points.
 6. The independently reconstructed Dehn wedge gives
    `dS = log(M) dlog(L) - log(L) dlog(M)` with the required sign. Positivity
-   and `0<I<pi^2/2` select the real lift.
+   and `0 < I < π²/2` select the real lift.
 
 ## Main artifacts
 
