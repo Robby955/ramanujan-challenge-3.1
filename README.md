@@ -19,9 +19,7 @@ For the distinguished real branch of the 7₂ knot A-polynomial specified in
 [Problem 3.1](https://www.ramanujanmachine.com/ramanujan-challenge/), the
 manuscript proves
 
-```text
-∫_α^β (log(x) dy/y - log(y) dx/x) = 4π²/85.
-```
+> **∫_α^β (log(x) dy/y - log(y) dx/x) = 4π²/85.**
 
 The challenge introduced this formula as an open conjecture. Khoi's 2008 paper
 develops the general Godbillon-Vey/A-polynomial strategy and evaluates related
