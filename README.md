@@ -1,18 +1,23 @@
 # The $7_2$ regulator integral is $4\pi^2/85$
 
-## Reproducible proposed proof of the $7_2$ regulator identity
+## A reproducible computer-assisted proof of the $7_2$ regulator identity
 
 Status: **submitted; organizer evaluation pending**.
 
-Rob Sneiderman submitted this proposed computer-assisted proof on
-2026-07-12 at 02:38:40 UTC. The submission is recorded by the organizers under
-SHA-256 receipt `87985f32...9f06660`.
+The Ramanujan Challenge closed on August 1, 2026. One of the open problems it
+posed, Problem 3.1, asked for the exact value of a regulator integral associated
+with the $7_2$ knot. This repository contains a computer-assisted proof that the
+value is $4\pi^2/85$.
 
-## Claim
+Rob Sneiderman submitted the proof on 2026-07-12 at 02:38:40 UTC. The
+submission is recorded by the organizers under SHA-256 receipt
+`87985f32...9f06660`.
+
+## Result
 
 For the distinguished real branch of the `7_2` knot A-polynomial specified in
 [Problem 3.1](https://www.ramanujanmachine.com/ramanujan-challenge/), the
-manuscript claims
+manuscript proves
 
 ```text
 Integral_alpha^beta (log(x) dy/y - log(y) dx/x) = 4*pi^2/85.
@@ -97,9 +102,15 @@ all passed. During the replay, a recursive Sage launcher failure was found and
 repaired; the scripts now fail with an installation instruction instead of
 re-executing indefinitely when SnapPy is missing from Sage's Python.
 
-The audit establishes that the proposed proof is reproducible from the released
-artifacts. Organizer evaluation and independent mathematical review remain
-pending.
+The audit establishes that the proof is reproducible from the released
+artifacts. Organizer evaluation and further independent mathematical review
+remain pending.
+
+## License
+
+The manuscript and written material are licensed under CC BY 4.0. The
+verification code is licensed under the MIT License. See `LICENSE`,
+`LICENSE-PAPER`, and `LICENSE-CODE`.
 
 ## Tooling disclosure
 

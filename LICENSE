@@ -1,0 +1,11 @@
+# Licensing
+
+This repository uses separate licenses for the paper and the verification code.
+
+- The manuscript, its TeX source, the original submission, and the written
+  documentation are licensed under the Creative Commons Attribution 4.0
+  International License. See `LICENSE-PAPER`.
+- The source code in `verification/` is licensed under the MIT License. See
+  `LICENSE-CODE`.
+
+Copyright (c) 2026 Rob Sneiderman.

@@ -1,11 +1,11 @@
 cff-version: 1.2.0
-message: "If you use this proposed proof or its verification code, please cite this repository."
+message: "If you use this proof or its verification code, please cite this repository."
 title: "The 7_2 regulator integral is 4 pi^2/85"
 type: software
 authors:
   - family-names: Sneiderman
     given-names: Rob
-version: 0.1.0-proposed
+version: 1.0.0
 date-released: 2026-08-01
 repository-code: "https://github.com/Robby955/ramanujan-challenge-3.1"
 keywords:
@@ -14,4 +14,4 @@ keywords:
   - knot theory
   - regulator
   - computer-assisted proof
-license: NOASSERTION
+license: CC-BY-4.0
