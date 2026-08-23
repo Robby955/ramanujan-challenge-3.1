@@ -29,9 +29,9 @@ certificate, not a new general regulator method.
 
 ## Visual overview
 
-[![Watch the one-minute Ramanujan Challenge 3.1 overview](media/ramanujan-challenge-3.1-poster.png)](media/ramanujan-challenge-3.1-showcase.mp4)
+[![Watch the one-minute Ramanujan Challenge 3.1 overview](media/ramanujan-challenge-3.1-poster.png)](https://cdn.jsdelivr.net/gh/Robby955/ramanujan-challenge-3.1@95bac31a21bcc461c6dcaf4e348a1c545830b6b3/media/ramanujan-challenge-3.1-showcase.mp4)
 
-[Watch the one-minute film](media/ramanujan-challenge-3.1-showcase.mp4) for a
+[Watch the one-minute film](https://cdn.jsdelivr.net/gh/Robby955/ramanujan-challenge-3.1@95bac31a21bcc461c6dcaf4e348a1c545830b6b3/media/ramanujan-challenge-3.1-showcase.mp4) for a
 visual introduction to the regulator identity and the proof's main steps.
 
 ## Proof spine
