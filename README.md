@@ -27,6 +27,13 @@ paths for the figure-eight and 5₂ knots, but not this 7₂ identity. The
 claimed contribution here is the explicit 7₂ proof and reproducible
 certificate, not a new general regulator method.
 
+## Visual overview
+
+[![Watch the one-minute Ramanujan Challenge 3.1 overview](media/ramanujan-challenge-3.1-poster.png)](media/ramanujan-challenge-3.1-showcase.mp4)
+
+[Watch the one-minute film](media/ramanujan-challenge-3.1-showcase.mp4) for a
+visual introduction to the regulator identity and the proof's main steps.
+
 ## Proof spine
 
 1. An exact rational formula lifts the full A-polynomial arc to a continuous,
